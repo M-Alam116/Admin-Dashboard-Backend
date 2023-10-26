@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 
 const app = express();
+const port = 3000; // Use process.env.PORT for Heroku or other hosting platforms
 
 app.use(cors());
 app.use(express.json());
@@ -257,22 +258,37 @@ app.get("/api/users", (req, res) => {
   res.json(users);
 });
 
-// GET USER
+// GET USER BY ID
 app.get("/api/users/:id", (req, res) => {
-  const user = users.find((user) => user.id === parseInt(req.params.id));
-  res.json(user);
+  const userId = parseInt(req.params.id);
+  const user = users.find((user) => user.id === userId);
+
+  if (user) {
+    res.json(user);
+  } else {
+    res.status(404).json({ error: "User not found" });
+  }
 });
 
 // ADD USER
 app.post("/api/users", (req, res) => {
-  users.unshift(req.body)
-  res.json(users);
+  const newUser = req.body;
+  newUser.id = users.length + 1; // Generate a new unique ID
+  users.push(newUser);
+  res.status(201).json(newUser);
 });
 
 // DELETE USER
 app.delete("/api/users/:id", (req, res) => {
-  users = users.filter((user) => user.id !== parseInt(req.params.id));
-  res.json("User deleted!");
+  const userId = parseInt(req.params.id);
+  const userIndex = users.findIndex((user) => user.id === userId);
+
+  if (userIndex !== -1) {
+    users.splice(userIndex, 1);
+    res.json({ message: "User deleted" });
+  } else {
+    res.status(404).json({ error: "User not found" });
+  }
 });
 
 // GET PRODUCTS
@@ -280,24 +296,41 @@ app.get("/api/products", (req, res) => {
   res.json(products);
 });
 
-// GET PRODUCT
+// GET PRODUCT BY ID
 app.get("/api/products/:id", (req, res) => {
-  const product = products.find((product) => product.id === parseInt(req.params.id));
-  res.json(product);
+  const productId = parseInt(req.params.id);
+  const product = products.find((product) => product.id === productId);
+
+  if (product) {
+    res.json(product);
+  } else {
+    res.status(404).json({ error: "Product not found" });
+  }
 });
 
 // ADD PRODUCT
 app.post("/api/products", (req, res) => {
-  products.unshift(req.body)
-  res.json(products);
+  const newProduct = req.body;
+  newProduct.id = products.length + 1; // Generate a new unique ID
+  products.push(newProduct);
+  res.status(201).json(newProduct);
 });
 
 // DELETE PRODUCT
 app.delete("/api/products/:id", (req, res) => {
-  products = products.filter((product) => product.id !== parseInt(req.params.id));
-  res.json("Product deleted!");
+  const productId = parseInt(req.params.id);
+  const productIndex = products.findIndex(
+    (product) => product.id === productId
+  );
+
+  if (productIndex !== -1) {
+    products.splice(productIndex, 1);
+    res.json({ message: "Product deleted" });
+  } else {
+    res.status(404).json({ error: "Product not found" });
+  }
 });
 
-app.listen(8800, () => {
-  console.log("Connected to backend.");
+app.listen(port, () => {
+  console.log(`Connected to backend on port ${port}`);
 });
